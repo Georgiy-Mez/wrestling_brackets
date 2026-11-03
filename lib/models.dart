@@ -43,12 +43,74 @@ class Participant {
       );
 }
 
+/// Возрастная группа турнира со своими весовыми категориями.
+class AgeGroup {
+  final String id;
+  int minAge;
+
+  /// null — «и старше».
+  int? maxAge;
+
+  /// Верхние границы весовых категорий по возрастанию (вес <= границы).
+  /// Тяжелее последней — категория «N+ кг».
+  List<double> weights;
+
+  AgeGroup({
+    required this.id,
+    required this.minAge,
+    this.maxAge,
+    required this.weights,
+  });
+
+  String get title {
+    if (maxAge == null) return '$minAge+ лет';
+    if (maxAge == minAge) return '$minAge лет';
+    return '$minAge–$maxAge лет';
+  }
+
+  bool contains(int age) => age >= minAge && (maxAge == null || age <= maxAge!);
+
+  AgeGroup copy({String? newId}) => AgeGroup(
+      id: newId ?? id, minAge: minAge, maxAge: maxAge, weights: [...weights]);
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'minAge': minAge,
+        'maxAge': maxAge,
+        'weights': weights,
+      };
+
+  factory AgeGroup.fromJson(Map<String, dynamic> j) => AgeGroup(
+        id: j['id'] as String,
+        minAge: (j['minAge'] as num).toInt(),
+        maxAge: (j['maxAge'] as num?)?.toInt(),
+        weights: ((j['weights'] as List?) ?? const [])
+            .map((e) => (e as num).toDouble())
+            .toList(),
+      );
+}
+
+/// Возрастные группы и веса из положения (шаблон «Заполнить по положению»).
+/// id совпадают со старыми ключами сеток, чтобы старые турниры не сломались.
+List<AgeGroup> builtInAgeGroups() => [
+      AgeGroup(id: '6-7', minAge: 6, maxAge: 7, weights: [26]),
+      AgeGroup(id: '8-9', minAge: 8, maxAge: 9, weights: [27, 31, 36]),
+      AgeGroup(id: '10-11', minAge: 10, maxAge: 11, weights: [36, 40]),
+      AgeGroup(id: '12-13', minAge: 12, maxAge: 13, weights: [45, 50, 55]),
+      AgeGroup(id: '14-15', minAge: 14, maxAge: 15, weights: [50, 55, 60]),
+      AgeGroup(id: '16-17', minAge: 16, maxAge: 17, weights: [55, 60, 65, 70]),
+      AgeGroup(id: '18+', minAge: 18, maxAge: null, weights: [60, 65, 70, 75]),
+    ];
+
 class Tournament {
   final String id;
   String name;
   DateTime date;
   String place;
   final List<Participant> participants;
+
+  /// Возрастные группы и веса, заданные организатором.
+  List<AgeGroup> ageGroups;
 
   /// Ключ категории -> слоты первого круга (id участника или null = свободно).
   final Map<String, List<String?>> brackets;
@@ -63,10 +125,12 @@ class Tournament {
     required this.date,
     this.place = '',
     List<Participant>? participants,
+    List<AgeGroup>? ageGroups,
     Map<String, List<String?>>? brackets,
     this.onlineId,
     this.onlineSlug,
   })  : participants = participants ?? [],
+        ageGroups = ageGroups ?? builtInAgeGroups(),
         brackets = brackets ?? {};
 
   Map<String, Participant> get byId => {for (final p in participants) p.id: p};
@@ -85,6 +149,7 @@ class Tournament {
         'date': date.toIso8601String(),
         'place': place,
         'participants': participants.map((p) => p.toJson()).toList(),
+        'ageGroups': ageGroups.map((g) => g.toJson()).toList(),
         'brackets': brackets,
         if (onlineId != null) 'onlineId': onlineId,
         if (onlineSlug != null) 'onlineSlug': onlineSlug,
@@ -103,6 +168,10 @@ class Tournament {
       place: j['place'] as String? ?? '',
       participants: ((j['participants'] as List?) ?? const [])
           .map((e) => Participant.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      // старые турниры без своих групп — по положению
+      ageGroups: (j['ageGroups'] as List?)
+          ?.map((e) => AgeGroup.fromJson(e as Map<String, dynamic>))
           .toList(),
       brackets: b,
       onlineId: j['onlineId'] as String?,

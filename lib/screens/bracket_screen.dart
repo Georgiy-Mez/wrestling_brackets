@@ -93,7 +93,7 @@ class _BracketScreenState extends State<BracketScreen> {
       listenable: app,
       builder: (context, _) {
         final t = app.byId(widget.tournamentId);
-        final cat = WeightCategory.fromKey(key);
+        final cat = t == null ? null : WeightCategory.fromKey(key, t);
         if (t == null || cat == null) return const Scaffold();
         final asg = assign(t);
         final members = asg.members[key] ?? [];

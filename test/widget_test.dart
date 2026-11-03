@@ -47,4 +47,23 @@ void main() {
     expect(slots.length, 4);
     expect(conflictPairs(slots, {for (final x in ps) x.id: x}), isEmpty);
   });
+
+  test('свои возрастные группы и веса турнира', () {
+    final tt = Tournament(
+      id: 'c',
+      name: 'c',
+      date: DateTime(2026, 11, 1),
+      ageGroups: [
+        AgeGroup(id: 'g1', minAge: 10, maxAge: 12, weights: [30, 35.5]),
+        AgeGroup(id: 'g2', minAge: 13, weights: [50]),
+      ],
+    );
+    expect(baseCategory(p('a', 2015, 35, ''), tt)!.title, '10–12 лет, 35.5 кг');
+    expect(baseCategory(p('b', 2015, 40, ''), tt)!.title, '10–12 лет, 35.5+ кг');
+    expect(baseCategory(p('c', 1990, 49, ''), tt)!.title, '13+ лет, 50 кг');
+    expect(baseCategory(p('d', 2018, 20, ''), tt), isNull);
+    final j = Tournament.fromJson(tt.toJson());
+    expect(j.ageGroups.length, 2);
+    expect(j.ageGroups[1].maxAge, isNull);
+  });
 }

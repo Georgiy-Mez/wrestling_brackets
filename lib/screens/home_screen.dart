@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models.dart';
 import '../online.dart';
 import '../state.dart';
+import 'tournament_edit_screen.dart';
 import 'tournament_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -116,80 +117,12 @@ Future<bool> confirm(BuildContext context, String text,
   return r == true;
 }
 
+/// Открывает экран создания / редактирования турнира.
 Future<void> showTournamentDialog(BuildContext context,
-    {Tournament? existing}) async {
-  final name = TextEditingController(text: existing?.name ?? '');
-  final place = TextEditingController(text: existing?.place ?? '');
-  var date = existing?.date ?? DateTime.now();
-
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setSt) => AlertDialog(
-        title: Text(existing == null ? 'Новый турнир' : 'Турнир'),
-        content: SingleChildScrollView(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(
-              controller: name,
-              autofocus: existing == null,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Название'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: place,
-              textCapitalization: TextCapitalization.sentences,
-              decoration:
-                  const InputDecoration(labelText: 'Место проведения'),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.event),
-              title: Text('Дата: ${fmtDate(date)}'),
-              subtitle: const Text('Возраст считается по году турнира'),
-              onTap: () async {
-                final d = await showDatePicker(
-                  context: ctx,
-                  initialDate: date,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (d != null) setSt(() => date = d);
-              },
-            ),
-          ]),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Отмена')),
-          FilledButton(
-            onPressed: () {
-              if (name.text.trim().isEmpty) return;
-              Navigator.pop(ctx, true);
-            },
-            child: const Text('Сохранить'),
-          ),
-        ],
-      ),
-    ),
+    {Tournament? existing}) {
+  return Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+        builder: (_) => TournamentEditScreen(existing: existing)),
   );
-
-  if (ok != true) return;
-  if (existing == null) {
-    app.add(Tournament(
-      id: newId(),
-      name: name.text.trim(),
-      date: date,
-      place: place.text.trim(),
-    ));
-  } else {
-    existing
-      ..name = name.text.trim()
-      ..place = place.text.trim()
-      ..date = date;
-    app.save();
-    pushTournamentInfo(existing);
-  }
 }
