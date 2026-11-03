@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'online.dart';
 import 'screens/home_screen.dart';
 import 'state.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await app.load();
+  try {
+    await initOnline();
+  } catch (e) {
+    debugPrint('Supabase не запустился: $e');
+  }
   runApp(const App());
 }
 

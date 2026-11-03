@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подача заявок на турнир</title>
+<meta name="theme-color" content="#0a0f1c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0f1c; --bg2:#0f1628; --card:#131c33; --card2:#18233f;
+    --line:#24314f; --text:#e8edf7; --muted:#8b97b3;
+    --sky:#00b4d8; --sky2:#38d0f0; --gold:#f5c518; --red:#ff5a6a; --ok:#2fd27c;
+    --r:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* ---------- top bar ---------- */
+  .topbar{border-bottom:1px solid var(--line);background:rgba(10,15,28,.85);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+  .logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .logo-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--sky),#0077b6);display:grid;place-items:center;box-shadow:0 0 0 2px rgba(245,197,24,.6) inset}
+  .logo-mark svg{width:22px;height:22px}
+  .logo b{font-family:Unbounded;font-size:15px;letter-spacing:.02em;display:block;line-height:1.1}
+  .logo small{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .lang{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .lang button{background:none;border:0;color:var(--muted);font:600 12px Manrope;padding:6px 12px;border-radius:999px;cursor:pointer;letter-spacing:.05em}
+  .lang button.on{background:var(--sky);color:#04121a}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;overflow:hidden;padding:56px 0 64px;border-bottom:1px solid var(--line)}
+  .hero::before{content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(600px 300px at 85% 10%,rgba(0,180,216,.25),transparent 70%),
+      radial-gradient(500px 260px at 10% 100%,rgba(245,197,24,.12),transparent 70%);
+  }
+  .hero::after{content:"";position:absolute;inset:0;opacity:.07;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 4l6 10h-12zM24 44l-6-10h12zM4 24l10-6v12zM44 24l-10 6V18z' fill='%23f5c518'/%3E%3C/svg%3E");
+    mask-image:linear-gradient(90deg,transparent,#000 60%);-webkit-mask-image:linear-gradient(90deg,transparent,#000 60%)}
+  .hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.4fr 1fr;gap:32px;align-items:end}
+  .badge{display:inline-flex;align-items:center;gap:8px;font:700 11px Manrope;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.08);padding:6px 12px;border-radius:999px;margin-bottom:18px}
+  .badge i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(47,210,124,.2)}
+  .badge.closed{color:var(--red);border-color:rgba(255,90,106,.4);background:rgba(255,90,106,.08)}
+  .badge.closed i{background:var(--red);box-shadow:0 0 0 4px rgba(255,90,106,.2)}
+  h1{font-family:Unbounded;font-weight:800;font-size:clamp(28px,4.6vw,46px);line-height:1.08;letter-spacing:-.01em;text-transform:uppercase}
+  h1 span{color:var(--sky2)}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;color:var(--muted);font-weight:500}
+  .meta div{display:flex;align-items:center;gap:8px}
+  .meta svg{width:18px;height:18px;stroke:var(--sky2)}
+  .countdown{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+  .countdown p{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+  .cd{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .cd div{background:var(--bg2);border-radius:12px;padding:12px 8px;text-align:center}
+  .cd b{display:block;font:700 28px Unbounded;color:var(--gold)}
+  .cd small{color:var(--muted);font-size:12px}
+  .cd-date{margin-top:12px;font-size:13px;color:var(--muted)}
+
+  /* ---------- steps strip ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin:-28px 0 32px;position:relative;z-index:2}
+  .step{background:var(--bg2);padding:16px 18px;display:flex;gap:12px;align-items:center}
+  .step b{font:700 13px Unbounded;color:#04121a;background:var(--sky);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+  .step span{font-weight:600;font-size:14px}
+
+  /* ---------- form ---------- */
+  main{padding-bottom:64px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;margin-bottom:20px}
+  .card h2{font:700 16px Unbounded;text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .card h2::before{content:"";width:4px;height:18px;border-radius:2px;background:var(--gold)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  input,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);font:500 15px Manrope;padding:12px 14px;border-radius:10px;outline:none;transition:border-color .15s,box-shadow .15s}
+  input:focus,select:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(0,180,216,.18)}
+  input.bad,select.bad{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,90,106,.15)}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b97b3' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+
+  .ath-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
+  .ath-head h2{margin:0}
+  .count{font:700 13px Manrope;color:var(--sky2);background:rgba(0,180,216,.1);padding:6px 12px;border-radius:999px;white-space:nowrap}
+  .ath{display:grid;grid-template-columns:34px 2.4fr 1fr 1fr 1fr 40px;gap:10px;align-items:end;padding:14px;background:var(--card2);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;animation:in .2s ease}
+  @keyframes in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .ath .num{font:700 14px Unbounded;color:var(--muted);height:46px;display:grid;place-items:center}
+  .seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:3px;height:47px}
+  .seg button{flex:1;border:0;background:none;color:var(--muted);font:700 14px Manrope;border-radius:8px;cursor:pointer}
+  .seg button.on{background:var(--sky);color:#04121a}
+  .seg.bad{border-color:var(--red)}
+  .del{height:47px;border:1px solid var(--line);background:var(--bg2);border-radius:10px;color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.15s}
+  .del:hover{color:var(--red);border-color:var(--red)}
+  .del svg{width:18px;height:18px}
+  .add{width:100%;border:1.5px dashed var(--line);background:none;color:var(--sky2);font:700 14px Manrope;padding:14px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s}
+  .add:hover{border-color:var(--sky);background:rgba(0,180,216,.06)}
+
+  .consent{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--muted);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:500}
+  .consent input{width:20px;height:20px;flex:none;accent-color:var(--sky);margin-top:1px;padding:0}
+  .consent.bad{color:var(--red)}
+  .submit{margin-top:18px;width:100%;border:0;background:linear-gradient(135deg,var(--gold),#ffb000);color:#1a1300;font:800 15px Unbounded;text-transform:uppercase;letter-spacing:.04em;padding:18px;border-radius:12px;cursor:pointer;transition:transform .1s,filter .15s;box-shadow:0 10px 30px -10px rgba(245,197,24,.5)}
+  .submit:hover{filter:brightness(1.05)}
+  .submit:active{transform:scale(.99)}
+  .submit:disabled{opacity:.6;cursor:wait}
+  .err{margin-top:14px;padding:12px 14px;border-radius:10px;background:rgba(255,90,106,.1);border:1px solid rgba(255,90,106,.35);color:#ffb3bb;font-size:14px;display:none}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+  /* ---------- states ---------- */
+  .state{text-align:center;padding:56px 24px}
+  .state .ico{width:72px;height:72px;border-radius:50%;margin:0 auto 20px;display:grid;place-items:center}
+  .state .ico svg{width:36px;height:36px}
+  .state h2{font:700 22px Unbounded;text-transform:uppercase;margin-bottom:10px;justify-content:center}
+  .state h2::before{display:none}
+  .state p{color:var(--muted);max-width:460px;margin:0 auto}
+  .state ul{list-style:none;max-width:460px;margin:22px auto 0;text-align:left}
+  .state li{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:14px}
+  .state li span{color:var(--muted);white-space:nowrap}
+  .btn2{margin-top:24px;display:inline-block;border:1px solid var(--sky);color:var(--sky2);background:none;font:700 14px Manrope;padding:12px 22px;border-radius:10px;cursor:pointer}
+  .demo{background:rgba(245,197,24,.1);border-bottom:1px solid rgba(245,197,24,.3);color:var(--gold);font-size:13px;text-align:center;padding:8px 20px;font-weight:600}
+  .loader{display:grid;place-items:center;min-height:60vh}
+  .spin{width:42px;height:42px;border:3px solid var(--line);border-top-color:var(--sky);border-radius:50%;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+  @media (max-width:820px){
+    .hero .wrap{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr;margin-top:-24px}
+    .grid{grid-template-columns:1fr}
+    .ath{grid-template-columns:1fr 1fr;position:relative;padding-top:40px}
+    .ath .num{position:absolute;top:10px;left:14px;height:auto;font-size:12px}
+    .ath .f-name{grid-column:1/-1}
+    .ath .f-w{grid-column:auto}
+    .del{position:absolute;top:6px;right:8px;height:30px;width:30px;border:0;background:none}
+    .card{padding:18px}
+  }
+</style>
+</head>
+<body>
+
+<div id="demoBar" class="demo" hidden></div>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="#">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h4v6h8V5h4M4 19h4v-6M20 19h-4v-6"/></svg>
+      </div>
+      <div><b data-i="brand">Турнирная сетка</b><small data-i="brandSub">Онлайн-заявки</small></div>
+    </a>
+    <div class="lang">
+      <button data-lang="ru" class="on">RU</button>
+      <button data-lang="kz">ҚАЗ</button>
+    </div>
+  </div>
+</header>
+
+<div id="app"><div class="loader"><div class="spin"></div></div></div>
+
+<footer>
+  <div class="wrap">
+    <span id="footTitle"></span>
+    <span data-i="foot">Заявки принимаются только через эту форму</span>
+  </div>
+</footer>
+
+<script>
+/* ====================== НАСТРОЙКИ ====================== */
+// Вставь данные проекта Supabase (Project Settings → API).
+// Пока пусто — страница работает в демо-режиме.
+const SUPABASE_URL = "https://lxzoqghiidmgobiwehuj.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_iT1w3dpzoAu6WER8jbiKKw_BFAYQXBm";
+/* ======================================================= */
+
+const I18N = {
+  ru:{
+    brand:"Турнирная сетка", brandSub:"Онлайн-заявки",
+    open:"Приём заявок открыт", closed:"Приём заявок закрыт",
+    until:"До конца приёма", d:"дн", h:"ч", m:"мин", deadline:"Дедлайн",
+    s1:"Данные клуба", s2:"Добавьте спортсменов", s3:"Отправьте заявку",
+    clubCard:"Клуб и тренер", club:"Клуб", city:"Город", coach:"Тренер (ФИО)", phone:"Телефон тренера",
+    athletes:"Спортсмены", count:"Спортсменов", name:"ФИО спортсмена", year:"Год рожд.", gender:"Пол",
+    male:"М", female:"Ж", weight:"Вес, кг", add:"Добавить спортсмена",
+    consent:"Даю согласие на обработку персональных данных участников для проведения соревнований",
+    send:"Отправить заявку", sending:"Отправка…",
+    req:"Заполните выделенные поля", dup:"Спортсмен указан дважды: ", noAth:"Добавьте хотя бы одного спортсмена",
+    yearBad:"Проверьте год рождения", weightBad:"Проверьте вес (кг)", phoneBad:"Проверьте номер телефона", noConsent:"Нужно согласие на обработку данных",
+    netErr:"Не удалось отправить. Проверьте интернет и попробуйте ещё раз.",
+    okT:"Заявка отправлена", okP:"Организатор получил заявку. Сетки будут сформированы после окончания приёма.",
+    again:"Подать ещё одну заявку",
+    nfT:"Турнир не найден", nfP:"Ссылка неверная или приём заявок уже закрыт. Уточните ссылку у организатора.",
+    clT:"Приём заявок закрыт", clP:"Срок подачи заявок на этот турнир истёк.",
+    demo:"Демо-режим: данные никуда не отправляются. Подключи Supabase в настройках страницы.",
+    foot:"Заявки принимаются только через эту форму", kg:"кг", del:"Удалить"
+  },
+  kz:{
+    brand:"Турнирлік тор", brandSub:"Онлайн өтінімдер",
+    open:"Өтінім қабылдау ашық", closed:"Өтінім қабылдау жабық",
+    until:"Қабылдау аяқталғанша", d:"күн", h:"сағ", m:"мин", deadline:"Мерзімі",
+    s1:"Клуб деректері", s2:"Спортшыларды қосыңыз", s3:"Өтінімді жіберіңіз",
+    clubCard:"Клуб және жаттықтырушы", club:"Клуб", city:"Қала", coach:"Жаттықтырушы (аты-жөні)", phone:"Жаттықтырушының телефоны",
+    athletes:"Спортшылар", count:"Спортшылар", name:"Спортшының аты-жөні", year:"Туған жылы", gender:"Жынысы",
+    male:"Ер", female:"Әйел", weight:"Салмағы, кг", add:"Спортшы қосу",
+    consent:"Жарысты өткізу үшін қатысушылардың дербес деректерін өңдеуге келісім беремін",
+    send:"Өтінімді жіберу", sending:"Жіберілуде…",
+    req:"Белгіленген өрістерді толтырыңыз", dup:"Спортшы екі рет енгізілген: ", noAth:"Кемінде бір спортшы қосыңыз",
+    yearBad:"Туған жылын тексеріңіз", weightBad:"Салмақты тексеріңіз (кг)", phoneBad:"Телефон нөмірін тексеріңіз", noConsent:"Деректерді өңдеуге келісім қажет",
+    netErr:"Жіберу мүмкін болмады. Интернетті тексеріп, қайталап көріңіз.",
+    okT:"Өтінім жіберілді", okP:"Ұйымдастырушы өтінімді алды. Торлар қабылдау аяқталғаннан кейін жасалады.",
+    again:"Тағы өтінім беру",
+    nfT:"Турнир табылмады", nfP:"Сілтеме қате немесе өтінім қабылдау жабылған. Сілтемені ұйымдастырушыдан нақтылаңыз.",
+    clT:"Өтінім қабылдау жабық", clP:"Бұл турнирге өтінім беру мерзімі аяқталды.",
+    demo:"Демо режим: деректер ешқайда жіберілмейді. Беттің баптауларында Supabase қосыңыз.",
+    foot:"Өтінімдер тек осы форма арқылы қабылданады", kg:"кг", del:"Жою"
+  }
+};
+
+let lang = "ru";
+try { lang = localStorage.getItem("lang") || "ru"; } catch(e){}
+const t = k => (I18N[lang] && I18N[lang][k]) || I18N.ru[k] || k;
+
+const DEMO = !SUPABASE_URL || !SUPABASE_ANON_KEY;
+const params = new URLSearchParams(location.search);
+const slug = (params.get("t") || "").trim();
+let sb = null, tour = null, athletes = [], view = "loading", lastSent = null, timer = null;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const blankAth = () => ({ id: uid(), name: "", year: "", gender: "", weight: "" });
+
+/* ---------- ICONS ---------- */
+const IC = {
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.2-7-12a7 7 0 0114 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  plus:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="#04121a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
+
+/* ---------- DATA ---------- */
+async function loadTournament(){
+  if (DEMO){
+    const dl = new Date(Date.now() + 3*864e5 + 5*36e5);
+    return { id:"demo", title:"Открытый турнир по грэпплингу г. Темиртау", date:new Date(Date.now()+7*864e5).toISOString().slice(0,10),
+      place:"Темиртау", deadline:dl.toISOString(), is_open:true };
+  }
+  if (!slug) return null;
+  await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data, error } = await sb.from("tournaments")
+    .select("id,title,date,place,deadline,is_open").eq("slug", slug).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+function loadScript(src){
+  return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+}
+const isClosed = () => !tour || !tour.is_open || (tour.deadline && new Date(tour.deadline) <= new Date());
+
+/* ---------- RENDER ---------- */
+function render(){
+  document.documentElement.lang = lang === "kz" ? "kk" : "ru";
+  document.querySelectorAll("[data-i]").forEach(el => el.textContent = t(el.dataset.i));
+  document.querySelectorAll(".lang button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
+  const db = $("#demoBar"); db.hidden = !DEMO; db.textContent = t("demo");
+  $("#footTitle").textContent = tour ? tour.title : "";
+  if (tour) document.title = tour.title;
+
+  const app = $("#app");
+  if (view === "loading") return;
+  if (view === "notfound"){ app.innerHTML = stateBox("red", IC.x, t("nfT"), t("nfP")); return; }
+
+  let body;
+  if (view === "sent") body = sentBox();
+  else if (isClosed()) body = `<div class="card">${stateBox("red", IC.x, t("clT"), t("clP"))}</div>`;
+  else body = formHtml();
+
+  app.innerHTML = heroHtml() + `<main><div class="wrap">${view==="form" && !isClosed() ? stepsHtml() : '<div style="height:32px"></div>'}${body}</div></main>`;
+  tick();
+  if (view === "form" && !isClosed()) bindForm();
+  if (view === "sent") $("#again").onclick = () => { athletes = [blankAth()]; view = "form"; render(); scrollTo({top:0}); };
+}
+
+function fmtDate(d, withTime){
+  if (!d) return "";
+  const o = { day:"numeric", month:"long", year:"numeric" };
+  if (withTime){ o.hour = "2-digit"; o.minute = "2-digit"; }
+  return new Date(d).toLocaleString(lang === "kz" ? "kk-KZ" : "ru-RU", o);
+}
+
+function heroHtml(){
+  const closed = isClosed();
+  const words = tour.title.split(" ");
+  const titleHtml = words.length > 2
+    ? esc(words.slice(0, -2).join(" ")) + " <span>" + esc(words.slice(-2).join(" ")) + "</span>"
+    : esc(tour.title);
+  return `
+  <section class="hero"><div class="wrap">
+    <div>
+      <div class="badge ${closed ? "closed" : ""}"><i></i>${t(closed ? "closed" : "open")}</div>
+      <h1>${titleHtml}</h1>
+      <div class="meta">
+        ${tour.date ? `<div>${IC.cal}${fmtDate(tour.date)}</div>` : ""}
+        ${tour.place ? `<div>${IC.pin}${esc(tour.place)}</div>` : ""}
+      </div>
+    </div>
+    ${tour.deadline && !closed ? `
+    <div class="countdown">
+      <p>${t("until")}</p>
+      <div class="cd"><div><b id="cdD">0</b><small>${t("d")}</small></div><div><b id="cdH">0</b><small>${t("h")}</small></div><div><b id="cdM">0</b><small>${t("m")}</small></div></div>
+      <div class="cd-date">${t("deadline")}: ${fmtDate(tour.deadline, true)}</div>
+    </div>` : ""}
+  </div></section>`;
+}
+
+function stepsHtml(){
+  return `<div class="steps">
+    <div class="step"><b>1</b><span>${t("s1")}</span></div>
+    <div class="step"><b>2</b><span>${t("s2")}</span></div>
+    <div class="step"><b>3</b><span>${t("s3")}</span></div>
+  </div>`;
+}
+
+function stateBox(color, icon, title, text, extra = ""){
+  const bg = color === "red" ? "var(--red)" : "var(--ok)";
+  return `<div class="state"><div class="ico" style="background:${bg}">${icon}</div><h2>${esc(title)}</h2><p>${esc(text)}</p>${extra}</div>`;
+}
+
+function sentBox(){
+  const rows = (lastSent || []).map(a => `<li>${esc(a.full_name)}<span>${esc(a.weight)} ${t("kg")} · ${a.gender === "M" ? t("male") : t("female")}</span></li>`).join("");
+  return `<div class="card">${stateBox("ok", IC.ok, t("okT"), t("okP"), `<ul>${rows}</ul><button class="btn2" id="again">${t("again")}</button>`)}</div>`;
+}
+
+function athRow(a, i){
+  const years = []; const now = new Date().getFullYear();
+  return `<div class="ath" data-id="${a.id}">
+    <div class="num">${i + 1}</div>
+    <div class="f-name"><label>${t("name")}</label><input data-f="name" value="${esc(a.name)}" autocomplete="off" placeholder="Иванов Иван"></div>
+    <div><label>${t("year")}</label><input data-f="year" value="${esc(a.year)}" inputmode="numeric" maxlength="4" placeholder="${now - 12}"></div>
+    <div><label>${t("gender")}</label><div class="seg" data-f="gender">
+      <button type="button" data-v="M" class="${a.gender === "M" ? "on" : ""}">${t("male")}</button>
+      <button type="button" data-v="F" class="${a.gender === "F" ? "on" : ""}">${t("female")}</button>
+    </div></div>
+    <div class="f-w"><label>${t("weight")}</label><input data-f="weight" value="${esc(a.weight)}" inputmode="decimal" maxlength="5" placeholder="42.5"></div>
+    <button type="button" class="del" title="${t("del")}" ${athletes.length < 2 ? 'style="visibility:hidden"' : ""}>${IC.del}</button>
+  </div>`;
+}
+
+function formHtml(){
+  const saved = loadCoach();
+  return `<form id="f" novalidate>
+    <div class="card">
+      <h2>${t("clubCard")}</h2>
+      <div class="grid">
+        <div><label>${t("club")}</label><input name="club" value="${esc(saved.club)}" required></div>
+        <div><label>${t("city")}</label><input name="city" value="${esc(saved.city)}"></div>
+        <div><label>${t("coach")}</label><input name="coach" value="${esc(saved.coach)}" required></div>
+        <div><label>${t("phone")}</label><input name="phone" value="${esc(saved.phone || "+7 ")}" inputmode="tel" required></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ath-head"><h2>${t("athletes")}</h2><span class="count" id="cnt"></span></div>
+      <div id="list">${athletes.map(athRow).join("")}</div>
+      <button type="button" class="add" id="add">${IC.plus}${t("add")}</button>
+    </div>
+    <div class="card">
+      <label class="consent" id="consentL"><input type="checkbox" id="consent"><span>${t("consent")}</span></label>
+      <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></div>
+      <button class="submit" id="send">${t("send")}</button>
+      <div class="err" id="err"></div>
+    </div>
+  </form>`;
+}
+
+/* ---------- FORM LOGIC ---------- */
+function updCount(){ const c = $("#cnt"); if (c) c.textContent = `${t("count")}: ${athletes.length}`; }
+
+function bindForm(){
+  updCount();
+  const list = $("#list");
+  list.addEventListener("input", e => {
+    const row = e.target.closest(".ath"); if (!row) return;
+    const a = athletes.find(x => x.id === row.dataset.id);
+    const f = e.target.dataset.f;
+    if (f === "year") e.target.value = e.target.value.replace(/\D/g, "");
+    if (f === "weight") e.target.value = e.target.value.replace(",", ".").replace(/[^\d.]/g, "");
+    if (f) { a[f] = e.target.value; e.target.classList.remove("bad"); }
+  });
+  list.addEventListener("click", e => {
+    const row = e.target.closest(".ath"); if (!row) return;
+    const a = athletes.find(x => x.id === row.dataset.id);
+    const segBtn = e.target.closest(".seg button");
+    if (segBtn){
+      a.gender = segBtn.dataset.v;
+      const seg = segBtn.parentElement; seg.classList.remove("bad");
+      seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === segBtn));
+    }
+    if (e.target.closest(".del")){
+      athletes = athletes.filter(x => x.id !== a.id);
+      rerenderList();
+    }
+  });
+  $("#add").onclick = () => {
+    athletes.push(blankAth());
+    rerenderList();
+    const rows = list.querySelectorAll(".ath");
+    rows[rows.length - 1].querySelector("input").focus();
+  };
+  const phone = $('[name="phone"]');
+  phone.addEventListener("input", () => { phone.value = fmtPhone(phone.value); phone.classList.remove("bad"); });
+  $("#f").addEventListener("input", e => { if (e.target.name) e.target.classList.remove("bad"); });
+  $("#consent").onchange = () => $("#consentL").classList.remove("bad");
+  $("#f").onsubmit = submit;
+}
+
+function rerenderList(){ $("#list").innerHTML = athletes.map(athRow).join(""); updCount(); }
+
+function fmtPhone(v){
+  let d = v.replace(/\D/g, "");
+  if (d.startsWith("8")) d = "7" + d.slice(1);
+  if (!d.startsWith("7")) d = "7" + d;
+  d = d.slice(0, 11);
+  const p = [d.slice(1,4), d.slice(4,7), d.slice(7,9), d.slice(9,11)];
+  let out = "+7";
+  if (p[0]) out += " (" + p[0] + (p[0].length === 3 ? ")" : "");
+  if (p[1]) out += " " + p[1];
+  if (p[2]) out += "-" + p[2];
+  if (p[3]) out += "-" + p[3];
+  return out;
+}
+
+const normName = s => s.trim().replace(/\s+/g, " ");
+
+async function submit(e){
+  e.preventDefault();
+  const f = e.target, err = $("#err");
+  err.style.display = "none";
+  if (f.website.value) return; // honeypot: бот заполнил скрытое поле
+  const msgs = new Set();
+  let firstBad = null;
+  const bad = el => { el.classList.add("bad"); firstBad = firstBad || el; };
+
+  ["club", "coach"].forEach(n => { if (!f[n].value.trim()) { bad(f[n]); msgs.add(t("req")); } });
+  if (f.phone.value.replace(/\D/g, "").length !== 11){ bad(f.phone); msgs.add(t("phoneBad")); }
+
+  if (!athletes.length) msgs.add(t("noAth"));
+  const nowY = new Date().getFullYear(), seen = new Map();
+  athletes.forEach(a => {
+    const row = document.querySelector(`.ath[data-id="${a.id}"]`);
+    const nm = normName(a.name);
+    if (!nm){ bad(row.querySelector('[data-f="name"]')); msgs.add(t("req")); }
+    const y = +a.year;
+    if (!a.year){ bad(row.querySelector('[data-f="year"]')); msgs.add(t("req")); }
+    else if (y < nowY - 70 || y > nowY - 3){ bad(row.querySelector('[data-f="year"]')); msgs.add(t("yearBad")); }
+    if (!a.gender){ bad(row.querySelector(".seg")); msgs.add(t("req")); }
+    const w = parseFloat(a.weight);
+    if (!a.weight){ bad(row.querySelector('[data-f="weight"]')); msgs.add(t("req")); }
+    else if (!(w >= 10 && w <= 200)){ bad(row.querySelector('[data-f="weight"]')); msgs.add(t("weightBad")); }
+    const key = nm.toLowerCase() + "|" + a.year;
+    if (nm && seen.has(key)){ bad(row.querySelector('[data-f="name"]')); msgs.add(t("dup") + nm); }
+    seen.set(key, 1);
+  });
+  if (!$("#consent").checked){ $("#consentL").classList.add("bad"); msgs.add(t("noConsent")); }
+
+  if (msgs.size){
+    err.innerHTML = [...msgs].map(esc).join("<br>"); err.style.display = "block";
+    (firstBad || err).scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  const coach = { club: f.club.value.trim(), city: f.city.value.trim(), coach: normName(f.coach.value), phone: f.phone.value };
+  saveCoach(coach);
+  const rows = athletes.map(a => ({
+    tournament_id: tour.id, club: coach.club, city: coach.city || null, coach: coach.coach, coach_phone: coach.phone,
+    full_name: normName(a.name), birth_year: +a.year, gender: a.gender, weight: Math.round(parseFloat(a.weight) * 10) / 10
+  }));
+
+  const btn = $("#send"); btn.disabled = true; btn.textContent = t("sending");
+  try {
+    if (DEMO) { await new Promise(r => setTimeout(r, 700)); console.log("DEMO insert", rows); }
+    else {
+      const { error } = await sb.from("entries").insert(rows);
+      if (error) throw error;
+    }
+    lastSent = rows; view = "sent"; render(); scrollTo({ top: 0, behavior: "smooth" });
+  } catch (ex){
+    console.error(ex);
+    err.textContent = t("netErr"); err.style.display = "block";
+    btn.disabled = false; btn.textContent = t("send");
+  }
+}
+
+function loadCoach(){ try { return JSON.parse(localStorage.getItem("coach") || "{}"); } catch(e){ return {}; } }
+function saveCoach(c){ try { localStorage.setItem("coach", JSON.stringify(c)); } catch(e){} }
+
+/* ---------- COUNTDOWN ---------- */
+function tick(){
+  clearTimeout(timer);
+  const D = $("#cdD"); if (!D || !tour.deadline) return;
+  const ms = new Date(tour.deadline) - Date.now();
+  if (ms <= 0) { render(); return; }
+  D.textContent = Math.floor(ms / 864e5);
+  $("#cdH").textContent = Math.floor(ms % 864e5 / 36e5);
+  $("#cdM").textContent = Math.floor(ms % 36e5 / 6e4);
+  timer = setTimeout(tick, 30000);
+}
+
+/* ---------- LANG ---------- */
+document.querySelectorAll(".lang button").forEach(b => b.onclick = () => {
+  lang = b.dataset.lang;
+  try { localStorage.setItem("lang", lang); } catch(e){}
+  if (view === "form") { // сохранить введённое в поля клуба перед перерисовкой
+    const f = $("#f");
+    if (f) saveCoach({ club: f.club.value, city: f.city.value, coach: f.coach.value, phone: f.phone.value });
+  }
+  render();
+});
+
+/* ---------- START ---------- */
+(async () => {
+  try {
+    tour = await loadTournament();
+    if (!tour) view = "notfound";
+    else { athletes = [blankAth()]; view = "form"; }
+  } catch (e) { console.error(e); view = "notfound"; }
+  render();
+})();
+</script>
+</body>
+</html>

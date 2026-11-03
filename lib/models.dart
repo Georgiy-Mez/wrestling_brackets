@@ -6,6 +6,9 @@ class Participant {
   String team;
   bool female;
 
+  /// id онлайн-заявки (Supabase), если участник пришёл с сайта.
+  String? remoteId;
+
   Participant({
     required this.id,
     required this.name,
@@ -13,6 +16,7 @@ class Participant {
     required this.weight,
     this.team = '',
     this.female = false,
+    this.remoteId,
   });
 
   /// Ключ команды для сравнения (без регистра и пробелов по краям).
@@ -25,6 +29,7 @@ class Participant {
         'weight': weight,
         'team': team,
         'female': female,
+        if (remoteId != null) 'remoteId': remoteId,
       };
 
   factory Participant.fromJson(Map<String, dynamic> j) => Participant(
@@ -34,6 +39,7 @@ class Participant {
         weight: (j['weight'] as num).toDouble(),
         team: j['team'] as String? ?? '',
         female: j['female'] as bool? ?? false,
+        remoteId: j['remoteId'] as String?,
       );
 }
 
@@ -47,6 +53,10 @@ class Tournament {
   /// Ключ категории -> слоты первого круга (id участника или null = свободно).
   final Map<String, List<String?>> brackets;
 
+  /// Онлайн-приём заявок: id и slug турнира в Supabase.
+  String? onlineId;
+  String? onlineSlug;
+
   Tournament({
     required this.id,
     required this.name,
@@ -54,6 +64,8 @@ class Tournament {
     this.place = '',
     List<Participant>? participants,
     Map<String, List<String?>>? brackets,
+    this.onlineId,
+    this.onlineSlug,
   })  : participants = participants ?? [],
         brackets = brackets ?? {};
 
@@ -74,6 +86,8 @@ class Tournament {
         'place': place,
         'participants': participants.map((p) => p.toJson()).toList(),
         'brackets': brackets,
+        if (onlineId != null) 'onlineId': onlineId,
+        if (onlineSlug != null) 'onlineSlug': onlineSlug,
       };
 
   factory Tournament.fromJson(Map<String, dynamic> j) {
@@ -91,6 +105,8 @@ class Tournament {
           .map((e) => Participant.fromJson(e as Map<String, dynamic>))
           .toList(),
       brackets: b,
+      onlineId: j['onlineId'] as String?,
+      onlineSlug: j['onlineSlug'] as String?,
     );
   }
 }

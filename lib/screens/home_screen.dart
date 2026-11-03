@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models.dart';
+import '../online.dart';
 import '../state.dart';
 import 'tournament_screen.dart';
 
@@ -46,7 +47,10 @@ class HomeScreen extends StatelessWidget {
                             } else if (v == 'delete') {
                               final ok = await confirm(context,
                                   'Удалить турнир «${t.name}» со всеми участниками и сетками?');
-                              if (ok) app.remove(t);
+                              if (ok) {
+                                deleteRemoteTournament(t);
+                                app.remove(t);
+                              }
                             }
                           },
                           itemBuilder: (_) => const [
@@ -186,5 +190,6 @@ Future<void> showTournamentDialog(BuildContext context,
       ..place = place.text.trim()
       ..date = date;
     app.save();
+    pushTournamentInfo(existing);
   }
 }

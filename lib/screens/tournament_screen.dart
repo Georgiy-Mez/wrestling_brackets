@@ -7,6 +7,7 @@ import '../pdf_export.dart';
 import '../state.dart';
 import 'bracket_screen.dart';
 import 'home_screen.dart';
+import 'online_tab.dart';
 import 'participant_form.dart';
 
 class TournamentScreen extends StatelessWidget {
@@ -22,7 +23,7 @@ class TournamentScreen extends StatelessWidget {
         if (t == null) return const Scaffold();
         final asg = assign(t);
         return DefaultTabController(
-          length: 2,
+          length: 3,
           child: Scaffold(
             appBar: AppBar(
               title: Text(t.name),
@@ -36,11 +37,13 @@ class TournamentScreen extends StatelessWidget {
               bottom: TabBar(tabs: [
                 Tab(text: 'Участники (${t.participants.length})'),
                 Tab(text: 'Сетки (${asg.members.length})'),
+                const Tab(text: 'Заявки'),
               ]),
             ),
             body: TabBarView(children: [
               _ParticipantsTab(t: t, asg: asg),
               _BracketsTab(t: t, asg: asg),
+              OnlineTab(t: t),
             ]),
           ),
         );
