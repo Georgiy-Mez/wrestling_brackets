@@ -45,7 +45,7 @@ bool onlineReady = false;
 
 Future<void> initOnline() async {
   if (!onlineConfigured) return;
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+  await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseAnonKey);
   onlineReady = true;
 }
 
