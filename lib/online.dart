@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,11 +13,12 @@ class Entry {
   final String club;
   final String city;
   final String coach;
-  final String coachPhone;
   final String fullName;
   final int birthYear;
-  final bool female;
   final double weight;
+
+  /// Подпись категории, выбранной тренером («57 кг», «85+ кг»).
+  final String weightCat;
   final DateTime createdAt;
 
   Entry.fromMap(Map<String, dynamic> m)
@@ -24,11 +26,10 @@ class Entry {
         club = (m['club'] as String? ?? '').trim(),
         city = (m['city'] as String? ?? '').trim(),
         coach = (m['coach'] as String? ?? '').trim(),
-        coachPhone = (m['coach_phone'] as String? ?? '').trim(),
         fullName = (m['full_name'] as String? ?? '').trim(),
         birthYear = (m['birth_year'] as num).toInt(),
-        female = m['gender'] == 'F',
         weight = (m['weight'] as num).toDouble(),
+        weightCat = (m['weight_cat'] as String? ?? '').trim(),
         createdAt =
             DateTime.tryParse(m['created_at'] as String? ?? '')?.toLocal() ??
                 DateTime.now();
@@ -84,6 +85,12 @@ Future<void> signOut() => _db.auth.signOut();
 
 String _authError(String m) {
   final l = m.toLowerCase();
+  if (l.contains('security purposes') || l.contains('rate limit')) {
+    return 'Слишком много попыток. Подождите минуту и нажмите «Войти»';
+  }
+  if (l.contains('not confirmed')) {
+    return 'Почта не подтверждена. Откройте письмо от Supabase и нажмите ссылку, затем «Войти»';
+  }
   if (l.contains('invalid login')) return 'Неверная почта или пароль';
   if (l.contains('already registered')) return 'Такой пользователь уже есть — нажмите «Войти»';
   if (l.contains('password')) return 'Пароль минимум 6 символов';
@@ -102,6 +109,12 @@ String _newSlug() {
 String _dateOnly(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+/// Возрастные группы и веса для формы на сайте.
+List<Map<String, dynamic>> _groupsJson(Tournament t) => [
+      for (final g in t.ageGroups)
+        {'minAge': g.minAge, 'maxAge': g.maxAge, 'weights': g.weights},
+    ];
+
 /// Создаёт турнир в Supabase и сохраняет его id/slug локально.
 Future<void> publishTournament(Tournament t, DateTime deadline) async {
   final slug = _newSlug();
@@ -112,6 +125,7 @@ Future<void> publishTournament(Tournament t, DateTime deadline) async {
         'title': t.name,
         'date': _dateOnly(t.date),
         'place': t.place,
+        'age_groups': _groupsJson(t),
         'deadline': deadline.toUtc().toIso8601String(),
         'is_open': true,
       })
@@ -123,7 +137,7 @@ Future<void> publishTournament(Tournament t, DateTime deadline) async {
   await app.save();
 }
 
-/// Подтягивает название/дату/место после правки турнира в приложении.
+/// Отправляет на сайт название/дату/место и возрастные группы с весами.
 Future<void> pushTournamentInfo(Tournament t) async {
   if (t.onlineId == null || currentUser == null) return;
   try {
@@ -131,6 +145,7 @@ Future<void> pushTournamentInfo(Tournament t) async {
       'title': t.name,
       'date': _dateOnly(t.date),
       'place': t.place,
+      'age_groups': _groupsJson(t),
     }).eq('id', t.onlineId!);
   } catch (_) {}
 }
@@ -163,13 +178,47 @@ Future<void> deleteRemoteTournament(Tournament t) async {
   } catch (_) {}
 }
 
-/// Заявки турнира в реальном времени.
-Stream<List<Entry>> entriesStream(Tournament t) => _db
-    .from('entries')
-    .stream(primaryKey: ['id'])
-    .eq('tournament_id', t.onlineId!)
-    .order('created_at')
-    .map((rows) => rows.map(Entry.fromMap).toList());
+Future<List<Entry>> fetchEntries(Tournament t) async {
+  final rows = await _db
+      .from('entries')
+      .select()
+      .eq('tournament_id', t.onlineId!)
+      .order('created_at');
+  return rows.map(Entry.fromMap).toList();
+}
+
+/// Заявки турнира: обновляются каждые 10 секунд (обычными запросами,
+/// без WebSocket — так надёжнее на мобильном интернете).
+Stream<List<Entry>> entriesStream(Tournament t,
+    {Duration every = const Duration(seconds: 10)}) {
+  Timer? timer;
+  late final StreamController<List<Entry>> c;
+  var busy = false;
+  Future<void> tick() async {
+    if (busy) return;
+    busy = true;
+    try {
+      final list = await fetchEntries(t);
+      if (!c.isClosed) c.add(list);
+    } catch (e) {
+      if (!c.isClosed) c.addError(e);
+    } finally {
+      busy = false;
+    }
+  }
+
+  c = StreamController<List<Entry>>(
+    onListen: () {
+      tick();
+      timer = Timer.periodic(every, (_) => tick());
+    },
+    onCancel: () {
+      timer?.cancel();
+      c.close();
+    },
+  );
+  return c.stream;
+}
 
 Future<void> deleteEntry(String id) async {
   await _db.from('entries').delete().eq('id', id);
@@ -192,7 +241,6 @@ int importEntries(Tournament t, Iterable<Entry> entries) {
       birthYear: e.birthYear,
       weight: e.weight,
       team: e.club,
-      female: e.female,
       remoteId: e.id,
     ));
     n++;

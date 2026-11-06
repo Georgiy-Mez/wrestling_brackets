@@ -6,6 +6,7 @@ create table tournaments (
   title text not null,
   date date,
   place text,
+  age_groups jsonb,                       -- [{minAge, maxAge, weights}] из приложения
   deadline timestamptz,
   is_open boolean not null default true,
   owner uuid not null default auth.uid() references auth.users on delete cascade,
@@ -21,8 +22,9 @@ create table entries (
   coach_phone text check (char_length(coach_phone) <= 30),
   full_name text not null check (char_length(full_name) between 2 and 120),
   birth_year int not null check (birth_year between 1950 and 2030),
-  gender text not null check (gender in ('M','F')),
+  gender text check (gender in ('M','F')),   -- не используется
   weight numeric(5,1) not null check (weight between 10 and 200),
+  weight_cat text,                           -- «57 кг», «85+ кг»
   created_at timestamptz default now()
 );
 

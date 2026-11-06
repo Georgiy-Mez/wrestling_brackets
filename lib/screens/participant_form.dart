@@ -250,19 +250,6 @@ class _ParticipantFormState extends State<ParticipantForm> {
                 ),
               ),
             ]),
-            const SizedBox(height: 12),
-            SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(
-                    value: false, label: Text('Юноша'), icon: Icon(Icons.male)),
-                ButtonSegment(
-                    value: true,
-                    label: Text('Девушка'),
-                    icon: Icon(Icons.female)),
-              ],
-              selected: {_female},
-              onSelectionChanged: (s) => setState(() => _female = s.first),
-            ),
             const SizedBox(height: 16),
             if (preview != null)
               Card(

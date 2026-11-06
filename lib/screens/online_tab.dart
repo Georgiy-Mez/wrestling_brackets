@@ -290,6 +290,8 @@ class _EntriesViewState extends State<_EntriesView> {
     super.initState();
     _stream = entriesStream(widget.t);
     _loadRemote();
+    // веса на сайте всегда как в приложении
+    pushTournamentInfo(widget.t);
   }
 
   Future<void> _loadRemote() async {
@@ -422,7 +424,7 @@ class _EntriesViewState extends State<_EntriesView> {
 
             // импорт
             const SizedBox(height: 8),
-            if (snap.hasError)
+            if (snap.hasError && !snap.hasData)
               Card(
                 color: c.errorContainer,
                 child: Padding(
@@ -453,7 +455,7 @@ class _EntriesViewState extends State<_EntriesView> {
               const SizedBox(height: 4),
               Text(
                 'Всего заявок: ${all.length} · клубов: ${clubs.length}. '
-                'Новые появляются автоматически.',
+                'Список обновляется каждые 10 секунд.',
                 style: TextStyle(fontSize: 12, color: c.onSurfaceVariant),
               ),
               if (all.isEmpty)
@@ -486,8 +488,9 @@ class _EntriesViewState extends State<_EntriesView> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('$club${e.city.isNotEmpty ? ' (${e.city})' : ''}  ·  ${list.length}',
             style: const TextStyle(fontWeight: FontWeight.w700)),
-        Text([e.coach, e.coachPhone].where((s) => s.isNotEmpty).join(' · '),
-            style: TextStyle(fontSize: 12, color: c.onSurfaceVariant)),
+        if (e.coach.isNotEmpty)
+          Text('Тренер: ${e.coach}',
+              style: TextStyle(fontSize: 12, color: c.onSurfaceVariant)),
       ]),
     );
   }
@@ -499,14 +502,9 @@ class _EntriesViewState extends State<_EntriesView> {
       dense: true,
       leading: Icon(done ? Icons.check_circle : Icons.fiber_new,
           color: done ? Colors.green : c.primary),
-      title: Row(children: [
-        Flexible(child: Text(e.fullName, overflow: TextOverflow.ellipsis)),
-        if (e.female) ...[
-          const SizedBox(width: 6),
-          Icon(Icons.female, size: 18, color: c.tertiary),
-        ],
-      ]),
-      subtitle: Text('${e.birthYear} г.р. · ${fmtWeight(e.weight)} кг'
+      title: Text(e.fullName, overflow: TextOverflow.ellipsis),
+      subtitle: Text('${e.birthYear} г.р. · '
+          '${e.weightCat.isNotEmpty ? e.weightCat : '${fmtWeight(e.weight)} кг'}'
           '${done ? ' · в турнире' : ''}'),
       trailing: IconButton(
         tooltip: 'Удалить заявку',

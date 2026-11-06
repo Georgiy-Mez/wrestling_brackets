@@ -159,13 +159,7 @@ class _ParticipantsTabState extends State<_ParticipantsTab> {
         app.save();
       },
       child: ListTile(
-        title: Row(children: [
-          Flexible(child: Text(p.name, overflow: TextOverflow.ellipsis)),
-          if (p.female) ...[
-            const SizedBox(width: 6),
-            Icon(Icons.female, size: 18, color: c.tertiary),
-          ],
-        ]),
+        title: Text(p.name, overflow: TextOverflow.ellipsis),
         subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text([
             if (p.team.isNotEmpty) p.team,

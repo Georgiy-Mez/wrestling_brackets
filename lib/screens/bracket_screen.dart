@@ -79,7 +79,6 @@ class _BracketScreenState extends State<BracketScreen> {
             if (p.team.isNotEmpty) Text('Команда: ${p.team}'),
             Text('Год рождения: ${p.birthYear} (${ageOf(p, t)} лет)'),
             Text('Вес: ${fmtWeight(p.weight)} кг'),
-            if (p.female) const Text('Девушка'),
             if (note != null) Text(note),
           ],
         ),

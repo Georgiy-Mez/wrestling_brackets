@@ -82,13 +82,10 @@
   .ath-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
   .ath-head h2{margin:0}
   .count{font:700 13px Manrope;color:var(--sky2);background:rgba(0,180,216,.1);padding:6px 12px;border-radius:999px;white-space:nowrap}
-  .ath{display:grid;grid-template-columns:34px 2.4fr 1fr 1fr 1fr 40px;gap:10px;align-items:end;padding:14px;background:var(--card2);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;animation:in .2s ease}
+  .ath{display:grid;grid-template-columns:34px 2.4fr 1fr 1.4fr 40px;gap:10px;align-items:end;padding:14px;background:var(--card2);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;animation:in .2s ease}
   @keyframes in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
   .ath .num{font:700 14px Unbounded;color:var(--muted);height:46px;display:grid;place-items:center}
-  .seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:3px;height:47px}
-  .seg button{flex:1;border:0;background:none;color:var(--muted);font:700 14px Manrope;border-radius:8px;cursor:pointer}
-  .seg button.on{background:var(--sky);color:#04121a}
-  .seg.bad{border-color:var(--red)}
+  select:disabled{opacity:.55;cursor:not-allowed}
   .del{height:47px;border:1px solid var(--line);background:var(--bg2);border-radius:10px;color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.15s}
   .del:hover{color:var(--red);border-color:var(--red)}
   .del svg{width:18px;height:18px}
@@ -179,13 +176,14 @@ const I18N = {
     open:"Приём заявок открыт", closed:"Приём заявок закрыт",
     until:"До конца приёма", d:"дн", h:"ч", m:"мин", deadline:"Дедлайн",
     s1:"Данные клуба", s2:"Добавьте спортсменов", s3:"Отправьте заявку",
-    clubCard:"Клуб и тренер", club:"Клуб", city:"Город", coach:"Тренер (ФИО)", phone:"Телефон тренера",
-    athletes:"Спортсмены", count:"Спортсменов", name:"ФИО спортсмена", year:"Год рожд.", gender:"Пол",
-    male:"М", female:"Ж", weight:"Вес, кг", add:"Добавить спортсмена",
+    clubCard:"Клуб и тренер", club:"Клуб", city:"Город", coach:"Тренер (ФИО)",
+    athletes:"Спортсмены", count:"Спортсменов", name:"ФИО спортсмена", year:"Год рожд.",
+    weight:"Вес. категория", pick:"Выберите вес", yearFirst:"Сначала год рождения", noGroup:"Нет группы для этого возраста",
+    add:"Добавить спортсмена",
     consent:"Даю согласие на обработку персональных данных участников для проведения соревнований",
     send:"Отправить заявку", sending:"Отправка…",
     req:"Заполните выделенные поля", dup:"Спортсмен указан дважды: ", noAth:"Добавьте хотя бы одного спортсмена",
-    yearBad:"Проверьте год рождения", weightBad:"Проверьте вес (кг)", phoneBad:"Проверьте номер телефона", noConsent:"Нужно согласие на обработку данных",
+    yearBad:"Проверьте год рождения", weightBad:"Проверьте вес (кг)", noConsent:"Нужно согласие на обработку данных",
     netErr:"Не удалось отправить. Проверьте интернет и попробуйте ещё раз.",
     okT:"Заявка отправлена", okP:"Организатор получил заявку. Сетки будут сформированы после окончания приёма.",
     again:"Подать ещё одну заявку",
@@ -199,13 +197,14 @@ const I18N = {
     open:"Өтінім қабылдау ашық", closed:"Өтінім қабылдау жабық",
     until:"Қабылдау аяқталғанша", d:"күн", h:"сағ", m:"мин", deadline:"Мерзімі",
     s1:"Клуб деректері", s2:"Спортшыларды қосыңыз", s3:"Өтінімді жіберіңіз",
-    clubCard:"Клуб және жаттықтырушы", club:"Клуб", city:"Қала", coach:"Жаттықтырушы (аты-жөні)", phone:"Жаттықтырушының телефоны",
-    athletes:"Спортшылар", count:"Спортшылар", name:"Спортшының аты-жөні", year:"Туған жылы", gender:"Жынысы",
-    male:"Ер", female:"Әйел", weight:"Салмағы, кг", add:"Спортшы қосу",
+    clubCard:"Клуб және жаттықтырушы", club:"Клуб", city:"Қала", coach:"Жаттықтырушы (аты-жөні)",
+    athletes:"Спортшылар", count:"Спортшылар", name:"Спортшының аты-жөні", year:"Туған жылы",
+    weight:"Салмақ санаты", pick:"Салмақты таңдаңыз", yearFirst:"Алдымен туған жылы", noGroup:"Бұл жасқа топ жоқ",
+    add:"Спортшы қосу",
     consent:"Жарысты өткізу үшін қатысушылардың дербес деректерін өңдеуге келісім беремін",
     send:"Өтінімді жіберу", sending:"Жіберілуде…",
     req:"Белгіленген өрістерді толтырыңыз", dup:"Спортшы екі рет енгізілген: ", noAth:"Кемінде бір спортшы қосыңыз",
-    yearBad:"Туған жылын тексеріңіз", weightBad:"Салмақты тексеріңіз (кг)", phoneBad:"Телефон нөмірін тексеріңіз", noConsent:"Деректерді өңдеуге келісім қажет",
+    yearBad:"Туған жылын тексеріңіз", weightBad:"Салмақты тексеріңіз (кг)", noConsent:"Деректерді өңдеуге келісім қажет",
     netErr:"Жіберу мүмкін болмады. Интернетті тексеріп, қайталап көріңіз.",
     okT:"Өтінім жіберілді", okP:"Ұйымдастырушы өтінімді алды. Торлар қабылдау аяқталғаннан кейін жасалады.",
     again:"Тағы өтінім беру",
@@ -228,7 +227,7 @@ let sb = null, tour = null, athletes = [], view = "loading", lastSent = null, ti
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uid = () => Math.random().toString(36).slice(2, 9);
-const blankAth = () => ({ id: uid(), name: "", year: "", gender: "", weight: "" });
+const blankAth = () => ({ id: uid(), name: "", year: "", weight: "" });
 
 /* ---------- ICONS ---------- */
 const IC = {
@@ -245,13 +244,18 @@ async function loadTournament(){
   if (DEMO){
     const dl = new Date(Date.now() + 3*864e5 + 5*36e5);
     return { id:"demo", title:"Открытый турнир по грэпплингу г. Темиртау", date:new Date(Date.now()+7*864e5).toISOString().slice(0,10),
-      place:"Темиртау", deadline:dl.toISOString(), is_open:true };
+      place:"Темиртау", deadline:dl.toISOString(), is_open:true,
+      age_groups:[
+        {minAge:10,maxAge:11,weights:[36,40]},
+        {minAge:12,maxAge:13,weights:[45,50,55]},
+        {minAge:18,maxAge:null,weights:[57,61,66,70,75,80,85]}
+      ] };
   }
   if (!slug) return null;
   await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const { data, error } = await sb.from("tournaments")
-    .select("id,title,date,place,deadline,is_open").eq("slug", slug).maybeSingle();
+    .select("id,title,date,place,deadline,is_open,age_groups").eq("slug", slug).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -330,8 +334,34 @@ function stateBox(color, icon, title, text, extra = ""){
 }
 
 function sentBox(){
-  const rows = (lastSent || []).map(a => `<li>${esc(a.full_name)}<span>${esc(a.weight)} ${t("kg")} · ${a.gender === "M" ? t("male") : t("female")}</span></li>`).join("");
+  const rows = (lastSent || []).map(a => `<li>${esc(a.full_name)}<span>${a.birth_year} · ${esc(a.weight_cat || (a.weight + " " + t("kg")))}</span></li>`).join("");
   return `<div class="card">${stateBox("ok", IC.ok, t("okT"), t("okP"), `<ul>${rows}</ul><button class="btn2" id="again">${t("again")}</button>`)}</div>`;
+}
+
+/* ---------- WEIGHT CATEGORIES (из приложения организатора) ---------- */
+const hasGroups = () => Array.isArray(tour.age_groups) && tour.age_groups.length > 0;
+const tourYear = () => (tour.date ? new Date(tour.date) : new Date()).getFullYear();
+const fmtW = w => String(Math.round(w * 10) / 10);
+
+/** Категории для года рождения: [{v, label, weight}] или null, если возраст вне групп. */
+function catsFor(year){
+  const age = tourYear() - year;
+  const g = tour.age_groups.find(g => age >= g.minAge && (g.maxAge == null || age <= g.maxAge));
+  if (!g) return null;
+  const ws = [...(g.weights || [])].map(Number).sort((a, b) => a - b);
+  const out = ws.map(w => ({ v: fmtW(w), label: fmtW(w) + " кг", weight: w }));
+  if (ws.length) { const last = ws[ws.length - 1]; out.push({ v: "+" + fmtW(last), label: fmtW(last) + "+ кг", weight: last + 1 }); }
+  return out;
+}
+
+function weightField(a){
+  if (!hasGroups()) // турнир ещё не синхронизирован — свободный ввод
+    return `<input data-f="weight" value="${esc(a.weight)}" inputmode="decimal" maxlength="5" placeholder="42.5">`;
+  if (String(a.year).length !== 4) return `<select data-f="weight" disabled><option>${t("yearFirst")}</option></select>`;
+  const cats = catsFor(+a.year);
+  if (!cats) return `<select data-f="weight" disabled><option>${t("noGroup")}</option></select>`;
+  return `<select data-f="weight"><option value="">${t("pick")}</option>` +
+    cats.map(c => `<option value="${esc(c.v)}" ${c.v === a.weight ? "selected" : ""}>${esc(c.label)}</option>`).join("") + `</select>`;
 }
 
 function athRow(a, i){
@@ -340,11 +370,7 @@ function athRow(a, i){
     <div class="num">${i + 1}</div>
     <div class="f-name"><label>${t("name")}</label><input data-f="name" value="${esc(a.name)}" autocomplete="off" placeholder="Иванов Иван"></div>
     <div><label>${t("year")}</label><input data-f="year" value="${esc(a.year)}" inputmode="numeric" maxlength="4" placeholder="${now - 12}"></div>
-    <div><label>${t("gender")}</label><div class="seg" data-f="gender">
-      <button type="button" data-v="M" class="${a.gender === "M" ? "on" : ""}">${t("male")}</button>
-      <button type="button" data-v="F" class="${a.gender === "F" ? "on" : ""}">${t("female")}</button>
-    </div></div>
-    <div class="f-w"><label>${t("weight")}</label><input data-f="weight" value="${esc(a.weight)}" inputmode="decimal" maxlength="5" placeholder="42.5"></div>
+    <div class="f-w"><label>${t("weight")}</label><div class="wslot">${weightField(a)}</div></div>
     <button type="button" class="del" title="${t("del")}" ${athletes.length < 2 ? 'style="visibility:hidden"' : ""}>${IC.del}</button>
   </div>`;
 }
@@ -357,8 +383,7 @@ function formHtml(){
       <div class="grid">
         <div><label>${t("club")}</label><input name="club" value="${esc(saved.club)}" required></div>
         <div><label>${t("city")}</label><input name="city" value="${esc(saved.city)}"></div>
-        <div><label>${t("coach")}</label><input name="coach" value="${esc(saved.coach)}" required></div>
-        <div><label>${t("phone")}</label><input name="phone" value="${esc(saved.phone || "+7 ")}" inputmode="tel" required></div>
+        <div style="grid-column:1/-1"><label>${t("coach")}</label><input name="coach" value="${esc(saved.coach)}" required></div>
       </div>
     </div>
     <div class="card">
@@ -386,18 +411,22 @@ function bindForm(){
     const a = athletes.find(x => x.id === row.dataset.id);
     const f = e.target.dataset.f;
     if (f === "year") e.target.value = e.target.value.replace(/\D/g, "");
-    if (f === "weight") e.target.value = e.target.value.replace(",", ".").replace(/[^\d.]/g, "");
+    if (f === "weight" && e.target.tagName === "INPUT") e.target.value = e.target.value.replace(",", ".").replace(/[^\d.]/g, "");
     if (f) { a[f] = e.target.value; e.target.classList.remove("bad"); }
+    if (f === "year" && hasGroups()){
+      const cats = a.year.length === 4 ? catsFor(+a.year) : null;
+      if (!cats || !cats.some(c => c.v === a.weight)) a.weight = "";
+      row.querySelector(".wslot").innerHTML = weightField(a);
+    }
+  });
+  list.addEventListener("change", e => {
+    const row = e.target.closest(".ath"); if (!row || e.target.tagName !== "SELECT") return;
+    const a = athletes.find(x => x.id === row.dataset.id);
+    a.weight = e.target.value; e.target.classList.remove("bad");
   });
   list.addEventListener("click", e => {
     const row = e.target.closest(".ath"); if (!row) return;
     const a = athletes.find(x => x.id === row.dataset.id);
-    const segBtn = e.target.closest(".seg button");
-    if (segBtn){
-      a.gender = segBtn.dataset.v;
-      const seg = segBtn.parentElement; seg.classList.remove("bad");
-      seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === segBtn));
-    }
     if (e.target.closest(".del")){
       athletes = athletes.filter(x => x.id !== a.id);
       rerenderList();
@@ -409,8 +438,6 @@ function bindForm(){
     const rows = list.querySelectorAll(".ath");
     rows[rows.length - 1].querySelector("input").focus();
   };
-  const phone = $('[name="phone"]');
-  phone.addEventListener("input", () => { phone.value = fmtPhone(phone.value); phone.classList.remove("bad"); });
   $("#f").addEventListener("input", e => { if (e.target.name) e.target.classList.remove("bad"); });
   $("#consent").onchange = () => $("#consentL").classList.remove("bad");
   $("#f").onsubmit = submit;
@@ -444,7 +471,6 @@ async function submit(e){
   const bad = el => { el.classList.add("bad"); firstBad = firstBad || el; };
 
   ["club", "coach"].forEach(n => { if (!f[n].value.trim()) { bad(f[n]); msgs.add(t("req")); } });
-  if (f.phone.value.replace(/\D/g, "").length !== 11){ bad(f.phone); msgs.add(t("phoneBad")); }
 
   if (!athletes.length) msgs.add(t("noAth"));
   const nowY = new Date().getFullYear(), seen = new Map();
@@ -455,10 +481,19 @@ async function submit(e){
     const y = +a.year;
     if (!a.year){ bad(row.querySelector('[data-f="year"]')); msgs.add(t("req")); }
     else if (y < nowY - 70 || y > nowY - 3){ bad(row.querySelector('[data-f="year"]')); msgs.add(t("yearBad")); }
-    if (!a.gender){ bad(row.querySelector(".seg")); msgs.add(t("req")); }
-    const w = parseFloat(a.weight);
-    if (!a.weight){ bad(row.querySelector('[data-f="weight"]')); msgs.add(t("req")); }
-    else if (!(w >= 10 && w <= 200)){ bad(row.querySelector('[data-f="weight"]')); msgs.add(t("weightBad")); }
+    const wEl = row.querySelector('[data-f="weight"]');
+    if (hasGroups()){
+      a._cat = null;
+      if (y && a.year.length === 4){
+        const cats = catsFor(y);
+        if (!cats){ bad(wEl); msgs.add(t("noGroup") + ": " + (nm || a.year)); }
+        else { a._cat = cats.find(c => c.v === a.weight) || null; if (!a._cat){ bad(wEl); msgs.add(t("req")); } }
+      } else if (!a.weight){ bad(wEl); }
+    } else {
+      const w = parseFloat(a.weight);
+      if (!a.weight){ bad(wEl); msgs.add(t("req")); }
+      else if (!(w >= 10 && w <= 200)){ bad(wEl); msgs.add(t("weightBad")); }
+    }
     const key = nm.toLowerCase() + "|" + a.year;
     if (nm && seen.has(key)){ bad(row.querySelector('[data-f="name"]')); msgs.add(t("dup") + nm); }
     seen.set(key, 1);
@@ -471,11 +506,13 @@ async function submit(e){
     return;
   }
 
-  const coach = { club: f.club.value.trim(), city: f.city.value.trim(), coach: normName(f.coach.value), phone: f.phone.value };
+  const coach = { club: f.club.value.trim(), city: f.city.value.trim(), coach: normName(f.coach.value) };
   saveCoach(coach);
   const rows = athletes.map(a => ({
-    tournament_id: tour.id, club: coach.club, city: coach.city || null, coach: coach.coach, coach_phone: coach.phone,
-    full_name: normName(a.name), birth_year: +a.year, gender: a.gender, weight: Math.round(parseFloat(a.weight) * 10) / 10
+    tournament_id: tour.id, club: coach.club, city: coach.city || null, coach: coach.coach,
+    full_name: normName(a.name), birth_year: +a.year,
+    weight: a._cat ? a._cat.weight : Math.round(parseFloat(a.weight) * 10) / 10,
+    weight_cat: a._cat ? a._cat.label : null
   }));
 
   const btn = $("#send"); btn.disabled = true; btn.textContent = t("sending");
@@ -514,7 +551,7 @@ document.querySelectorAll(".lang button").forEach(b => b.onclick = () => {
   try { localStorage.setItem("lang", lang); } catch(e){}
   if (view === "form") { // сохранить введённое в поля клуба перед перерисовкой
     const f = $("#f");
-    if (f) saveCoach({ club: f.club.value, city: f.city.value, coach: f.coach.value, phone: f.phone.value });
+    if (f) saveCoach({ club: f.club.value, city: f.city.value, coach: f.coach.value });
   }
   render();
 });
